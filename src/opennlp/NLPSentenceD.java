@@ -17,14 +17,14 @@ public class NLPSentenceD {
 	public NLPSentenceD(String model){
 		model_route = model;
 	}
-	public String[] sentenceDetect(String file){
+	public String[] sentenceDetect(String text){
 		InputStream modelIn = null;
 		String sentences[] = null;
 		try {
 			modelIn = new FileInputStream(model_route);
 			SentenceModel model = new SentenceModel(modelIn);
 			SentenceDetectorME sentenceDetector = new SentenceDetectorME(model);
-			sentences = sentenceDetector.sentDetect(readFile(file));
+			sentences = sentenceDetector.sentDetect(text);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

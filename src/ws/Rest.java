@@ -20,6 +20,7 @@ public class Rest {
 
 			BufferedReader br = new BufferedReader(new InputStreamReader(
 					(conn.getInputStream())));
+			PrintWriter pw = new PrintWriter("C:/Users/Jorge/nlp/input.txt","UTF-8");
 
 			String output;
 			boolean criteria = false;
@@ -30,7 +31,11 @@ public class Rest {
 				else if(output.contains("</eligibility>")){
 					criteria = false;
 				}
-				if(criteria) System.out.println(output);
+				if(criteria){
+					System.out.println(output);
+					pw.println(output);
+				}
+				pw.close();
 			}
 
 			conn.disconnect();
