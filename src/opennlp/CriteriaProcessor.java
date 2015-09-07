@@ -10,14 +10,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CriteriaProcessor {
+	private NLPSentenceD sd;
+	private NLPTokenizer tk;
+	private NLPTagger tg;
+	private NLPChunker ck;
+	private List<String> sentences;
+	private List<String> tokens;
+	private List<String> posTags;
+	private List<String> chunkTags;
+	
+	public CriteriaProcessor(){
+		sd = new NLPSentenceD("C:/Users/Jorge/nlp/en-sent.bin");
+		tk = new NLPTokenizer("C:/Users/Jorge/nlp/en-token.bin");
+		tg = new NLPTagger("C:/Users/Jorge/nlp/en-pos-maxent.bin");
+		ck = new NLPChunker("C:/Users/Jorge/nlp/en-chunker.bin");
 
-	public static void main(String[] args){
+		sentences = new ArrayList<String>();
+		tokens = new ArrayList<String>();
+		posTags = new ArrayList<String>();
+		chunkTags = new ArrayList<String>();
+	}
+
+	/*public static void main(String[] args){
 		String criteria = downloadCT("https://clinicaltrials.gov/show/NCT00875901?displayxml=true");
 		if(criteria != null){
 			processText(criteria);
 		}
-	}
-	public static String downloadCT(String ctpath){
+	}*/
+	public String downloadCT(String ctpath){
 		String output = null;
 		String line;
 		try {
@@ -25,7 +45,7 @@ public class CriteriaProcessor {
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
 			conn.setRequestProperty("Accept", "text/xml");
-			System.out.println(conn.getContentType());
+			//System.out.println(conn.getContentType());
 			if (conn.getResponseCode() != 200) {
 				throw new RuntimeException("Failed : HTTP error code : "
 						+ conn.getResponseCode());
@@ -60,44 +80,64 @@ public class CriteriaProcessor {
 		return output;
 	}
 
-	public static List<String[]> processText(String text){
-		NLPSentenceD sd = new NLPSentenceD("C:/Users/Jorge/nlp/en-sent.bin");
-		NLPTokenizer tk = new NLPTokenizer("C:/Users/Jorge/nlp/en-token.bin");
-		NLPTagger tg = new NLPTagger("C:/Users/Jorge/nlp/en-pos-maxent.bin");
-		NLPChunker ck = new NLPChunker("C:/Users/Jorge/nlp/en-chunker.bin");
-
-		String sentences[];
-		List<String[]> tokens = new ArrayList<String[]>();
-		List<String[]> posTags = new ArrayList<String[]>();
-		List<String[]> chunkTags = new ArrayList<String[]>();
-
+	public List<String> processText(String text){
 		sentences = sd.sentenceDetect(text);
 
 		for(String sentence: sentences){
-			tokens.add(tk.tokenize(sentence));
+			tokens.addAll(tk.tokenize(sentence));
 		}
-		int i = 0;
-		while(i < tokens.size()){
-			posTags.add(tg.posTag(tokens.get(i)));
-			i++;
-		}
-		i = 0;
-		while(i < tokens.size()){
-			chunkTags.add(ck.chunk(tokens.get(i), posTags.get(i)));
-			i++;
-		}
+		posTags.addAll(tg.posTag(tokens));
+		chunkTags.addAll(ck.chunk(tokens, posTags));
 		//
-		for(int i1 = 0; i1 < tokens.size(); i1++){
-			System.out.println(">================ Sentence "+ i1 );
-			for(int i2 = 0; i2 < tokens.get(i1).length;i2++){
-				System.out.format("%10s\t %10s\t %10s\n",tokens.get(i1)[i2],posTags.get(i1)[i2],chunkTags.get(i1)[i2]);
-			}		
-		}
+		//printData();
 		//
 		return chunkTags;
 	}
+
+	public void getEntities(List<String> chunks){
+		int i=0;
+		while(i<tokens.size()){
+			if(chunks.get(i).contains("O")){
+				tokens.remove(i);
+				posTags.remove(i);
+				chunkTags.remove(i);
+			}
+			else{
+				i++;
+			}
+		}
+		for(String entity: createEntities()){
+			System.out.println(entity.toString());
+		}
+	}
 	
-	public List<String> getEntities(List<String[]> chunks){
-		return null;
+	private List<String> createEntities(){
+		List<String> entities = new ArrayList<String>();
+		StringBuilder sb = new StringBuilder();
+		boolean prevB = false;
+		for(int i=0; i < tokens.size();i++){
+			sb.append(tokens.get(i)+" ");
+			// new
+			if(chunkTags.get(i).contains("B") && !prevB){
+				entities.add(sb.toString());
+				sb.setLength(0);
+				prevB = true;
+			}
+			// new
+			else if(chunkTags.get(i).contains("B") && prevB){
+				entities.add(sb.toString());
+				sb.setLength(0);
+			}
+			else if(chunkTags.get(i).contains("I")){
+				prevB = false;
+			}
+		}
+		return entities;
+	}
+	
+	public void printData(){
+		for(int i1 = 0; i1 < tokens.size(); i1++){
+			System.out.format("%10s\t %7s\t %7s\n",tokens.get(i1),posTags.get(i1),chunkTags.get(i1));	
+		}
 	}
 }

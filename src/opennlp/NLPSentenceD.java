@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import opennlp.tools.sentdetect.SentenceDetectorME;
 import opennlp.tools.sentdetect.SentenceModel;
@@ -17,14 +19,16 @@ public class NLPSentenceD {
 	public NLPSentenceD(String model){
 		model_route = model;
 	}
-	public String[] sentenceDetect(String text){
+	public List<String> sentenceDetect(String text){
 		InputStream modelIn = null;
-		String sentences[] = null;
+		List<String> sentences = new ArrayList<String>();
 		try {
 			modelIn = new FileInputStream(model_route);
 			SentenceModel model = new SentenceModel(modelIn);
 			SentenceDetectorME sentenceDetector = new SentenceDetectorME(model);
-			sentences = sentenceDetector.sentDetect(text);
+			for(String sentence: sentenceDetector.sentDetect(text)){
+				sentences.add(sentence);
+			}
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

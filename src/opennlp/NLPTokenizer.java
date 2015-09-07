@@ -4,6 +4,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.tokenize.TokenizerME;
@@ -15,15 +17,16 @@ public class NLPTokenizer {
 	public NLPTokenizer(String model){
 		model_route = model;
 	}
-
-	public String[] tokenize(String sentence){
+	public List<String> tokenize(String sentence){
 		InputStream modelIn = null;
-		String tokens[] = null;
+		List<String> tokens = new ArrayList<String>();
 		try {
 			modelIn = new FileInputStream(model_route);
 			TokenizerModel model = new TokenizerModel(modelIn);
 			Tokenizer tokenizer = new TokenizerME(model);
-			tokens = tokenizer.tokenize(sentence);
+			for(String token: tokenizer.tokenize(sentence)){
+				tokens.add(token);
+			}
 		}
 		catch (FileNotFoundException e1) {
 			e1.printStackTrace();

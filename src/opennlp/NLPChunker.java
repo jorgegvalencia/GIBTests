@@ -4,6 +4,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import opennlp.tools.chunker.ChunkerME;
 import opennlp.tools.chunker.ChunkerModel;
@@ -15,15 +17,20 @@ public class NLPChunker {
 		model_route = model;
 	}
 
-	public String[] chunk(String[] tokens, String[] posTags){
+	public List<String> chunk(List<String> tokenList, List<String> tagList){
 		InputStream modelIn = null;
 		ChunkerModel model = null;
-		String chunkTags[] = null;
+		List<String> chunkTags = new ArrayList<String>();
+		String[] tokens = new String[tokenList.size()];
+		tokens = tokenList.toArray(tokens);
+		String[] posTags = new String[tagList.size()];
+		tokens = tagList.toArray(posTags);
 		try {
 			modelIn = new FileInputStream(model_route);
 			model = new ChunkerModel(modelIn);
 			ChunkerME chunker = new ChunkerME(model);
-			chunkTags = chunker.chunk(tokens, posTags);
+			for(String chunk : chunker.chunk(tokens, posTags))
+				chunkTags.add(chunk);
 		}
 		catch (FileNotFoundException e1) {
 			e1.printStackTrace();
