@@ -196,6 +196,7 @@ public class ConceptExtractor {
 		public static void printData(List<ProcessResult> data){
 			System.out.format("%7s %10s\t %7s\t %7s\n","Sentence","Token","POSTag","ChunkTag");
 			for(int i2 = 0; i2 < data.size();i2++){
+				System.out.println(data.get(i2).getSentence());
 				for(int i1 = 0; i1 < data.get(i2).getTokensList().size(); i1++){
 					System.out.format("%7d: %10s\t %7s\t %7s\n",
 							i2,
