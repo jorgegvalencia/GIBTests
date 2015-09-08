@@ -23,8 +23,8 @@ public class ConceptExtractor {
 
 		//with chunks
 		if(criteria != null){
-			ProcessResult result = cp.processText(criteria);
-			CriteriaProcessor.printData(result);
+			List<ProcessResult> results = cp.processText(criteria);
+			CriteriaProcessor.printData(results);
 		}
 	}
 	public static ClinicalTrial downloadCT(String nct_id){
@@ -119,27 +119,27 @@ public class ConceptExtractor {
 		private NLPTagger tg = new NLPTagger("en-pos-maxent.bin");
 		private NLPChunker ck = new NLPChunker("en-chunker.bin");
 		
-		public ProcessResult processText(String text){
+		public ProcessResult processSentence(String sentence){
 			ProcessResult result = new ProcessResult();
-			result.setSentences(sd.sentenceDetect(text));
-			List<String> sentenceTokens;
-			List<String> sentencePosTags;
-			List<String> sentenceChunkTags;
+			result.setSentence(sentence);
+			//result.setSentence(sd.sentenceDetect(text));
 			
-			for(String sentence: result.getSentences()){
-				sentenceTokens = new ArrayList<String>();
-				sentencePosTags = new ArrayList<String>();
-				sentenceChunkTags = new ArrayList<String>();
+			List<String> sentenceTokens = tk.tokenize(sentence);
+			List<String> sentencePosTags = tg.posTag(sentenceTokens);
+			List<String> sentenceChunkTags = ck.chunk(sentenceTokens,sentencePosTags);
 
-				sentenceTokens = tk.tokenize(sentence);
-				sentencePosTags = tg.posTag(sentenceTokens);
-				sentenceChunkTags = ck.chunk(sentenceTokens,sentencePosTags);
-
-				result.getTokensList().add(sentenceTokens);
-				result.getPosTagsList().add(sentencePosTags);
-				result.getChunkTagsList().add(sentenceChunkTags);
-			}
+			result.setTokensList(sentenceTokens);
+			result.setPosTagsList(sentencePosTags);
+			result.setChunkTagsList(sentenceChunkTags);
 			return result;
+		}
+		
+		public List<ProcessResult> processText(String text){
+			List<ProcessResult> resultList = new ArrayList<ProcessResult>();
+			for(String sentence: sd.sentenceDetect(text)){
+				resultList.add(processSentence(sentence));
+			}
+			return resultList;
 		}
 		
 /*		public List<String> processSentences(String text){
@@ -193,15 +193,15 @@ public class ConceptExtractor {
 			return entities;
 		}*/
 
-		public static void printData(ProcessResult data){
+		public static void printData(List<ProcessResult> data){
 			System.out.format("%7s %10s\t %7s\t %7s\n","Sentence","Token","POSTag","ChunkTag");
-			for(int i2 = 0; i2 < data.getSentences().size();i2++){
-				for(int i1 = 0; i1 < data.getTokensList().get(i2).size(); i1++){
+			for(int i2 = 0; i2 < data.size();i2++){
+				for(int i1 = 0; i1 < data.get(i2).getTokensList().size(); i1++){
 					System.out.format("%7d: %10s\t %7s\t %7s\n",
 							i2,
-							data.getTokensList().get(i2).get(i1),
-							data.getPosTagsList().get(i2).get(i1), 
-							data.getChunkTagsList().get(i2).get(i1));
+							data.get(i2).getTokensList().get(i1),
+							data.get(i2).getPosTagsList().get(i1), 
+							data.get(i2).getChunkTagsList().get(i1));
 				}
 				System.out.println("==========");
 			}
