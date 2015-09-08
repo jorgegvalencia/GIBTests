@@ -42,8 +42,9 @@ public class CriteriaProcessor {
 			processText(criteria);
 		}
 	}*/
-	public String downloadCT(String ctpath){
+	public ClinicalTrial downloadCT(String ctpath){
 		String output = null;
+		ClinicalTrial ct = new ClinicalTrial();
 		try {
 			URL url = new URL(ctpath);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -57,7 +58,6 @@ public class CriteriaProcessor {
 
 			XMLInputFactory factory = XMLInputFactory.newInstance();
 			XMLStreamReader streamReader = factory.createXMLStreamReader(br);
-			ClinicalTrial ct = new ClinicalTrial();
 			String currentElement = null;
 			while(streamReader.hasNext()){
 				int event = streamReader.next();
@@ -84,9 +84,6 @@ public class CriteriaProcessor {
 					case "study_type":
 						ct.setStudy_type(streamReader.getElementText());
 						break;
-					case "study_pop":
-						ct.setStudy_pop(streamReader.getElementText());
-						break;
 					case "sampling_method":
 						ct.setSampling_method(streamReader.getElementText());
 						break;
@@ -109,6 +106,13 @@ public class CriteriaProcessor {
 							ct.setExc_criteria((streamReader.getElementText()));
 						}
 					}
+					else if(currentElement.equals("study_pop")){
+						streamReader.next();
+						if(streamReader.getEventType() == XMLStreamReader.START_ELEMENT){
+							currentElement = streamReader.getLocalName();
+							ct.setStudy_pop(((streamReader.getElementText())));
+						}
+					}
 					break;
 				}
 			}
@@ -121,7 +125,7 @@ public class CriteriaProcessor {
 		} catch (XMLStreamException e) {
 			e.printStackTrace();
 		}
-		return output;
+		return ct;
 	}
 
 	public List<String> processText(String text){
@@ -135,7 +139,7 @@ public class CriteriaProcessor {
 		//
 		//printData();
 		//
-		return chunkTags;
+		return sentences;
 	}
 
 	public void getEntities(List<String> chunks){
@@ -150,11 +154,10 @@ public class CriteriaProcessor {
 				i++;
 			}
 		}
-		/*
+		
 		for(String entity: createEntities()){
 			System.out.println(entity.toString());
 		}
-		 */
 	}
 
 	private List<String> createEntities(){
