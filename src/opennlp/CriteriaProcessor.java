@@ -71,7 +71,7 @@ public class CriteriaProcessor {
 					case "nct_id":
 						ct.setNct_id(streamReader.getElementText());
 						break;
-					case "official_title":
+					case "brief_title":
 						ct.setTitle(streamReader.getElementText());
 						break;
 					case "overall_status":
@@ -139,11 +139,20 @@ public class CriteriaProcessor {
 		//
 		//printData();
 		//
+		return chunkTags;
+	}
+	
+	public List<String> processSentences(String text){
+		sentences = sd.sentenceDetect(text);
+
+		for(String sentence: sentences){
+			tokens.addAll(tk.tokenize(sentence));
+		}
 		return sentences;
 	}
 
 	public void getEntities(List<String> chunks){
-		int i=0;
+		/*int i=0;
 		while(i<tokens.size()){
 			if(chunks.get(i).contains("O")){
 				tokens.remove(i);
@@ -153,7 +162,7 @@ public class CriteriaProcessor {
 			else{
 				i++;
 			}
-		}
+		}*/
 		
 		for(String entity: createEntities()){
 			System.out.println(entity.toString());

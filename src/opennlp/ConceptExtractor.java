@@ -6,13 +6,17 @@ public class ConceptExtractor {
 		CriteriaProcessor cp = new CriteriaProcessor();
 		ClinicalTrial ct = cp.downloadCT("https://clinicaltrials.gov/show/NCT01334021?displayxml=true");
 		String criteria = ct.getExc_criteria();
-		for(String sentence: cp.processText(criteria)){
+		
+		//with sentences
+		for(String sentence: cp.processSentences(criteria)){
 			System.out.println(">>>"+sentence+"<<<"+"\n");
 		}
-/*		if(criteria != null){
+		
+		//with chunks
+		if(criteria != null){
 			cp.getEntities(cp.processText(criteria));
-			//cp.printData();
-		}*/
+			cp.printData();
+		}
 	}
 
 }
