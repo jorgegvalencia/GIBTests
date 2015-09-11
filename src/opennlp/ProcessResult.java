@@ -8,6 +8,7 @@ public class ProcessResult {
 	private List<String> tokensList;
 	private List<String> posTagsList;
 	private List<String> chunkTagsList;
+	private List<String> nounPhrases;
 
 	public ProcessResult(){
 		sentence = new String();	
@@ -30,6 +31,14 @@ public class ProcessResult {
 
 	public List<String> getChunkTagsList() {
 		return chunkTagsList;
+	}
+
+	public List<String> getNounPhrases() {
+		return nounPhrases;
+	}
+
+	public void setNounPhrases(List<String> nounPhrases) {
+		this.nounPhrases = nounPhrases;
 	}
 
 	public void setSentence(String sentence) {

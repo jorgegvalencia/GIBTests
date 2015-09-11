@@ -132,6 +132,7 @@ public class ConceptExtractor {
 			result.setTokensList(sentenceTokens);
 			result.setPosTagsList(sentencePosTags);
 			result.setChunkTagsList(sentenceChunkTags);
+			createEntities(result);
 			return result;
 		}
 
@@ -153,14 +154,6 @@ public class ConceptExtractor {
 			return resultList;
 		}
 
-		/*		public List<String> processSentences(String text){
-			sentences = sd.sentenceDetect(text);
-
-			for(String sentence: sentences){
-				tokens.addAll(tk.tokenize(sentence));
-			}
-			return sentences;
-		}*/
 
 		/*		public void getEntities(List<String> chunks){
 			int i=0;
@@ -180,34 +173,39 @@ public class ConceptExtractor {
 			}
 		}*/
 
-		/*		private List<String> createEntities(){
+		private void createEntities(ProcessResult result){
 			List<String> entities = new ArrayList<String>();
 			StringBuilder sb = new StringBuilder();
-			boolean prevB = false;
-			for(int i=0; i < tokens.size();i++){
-				sb.append(tokens.get(i)+" ");
+			boolean nounphrase = false;
+			for(int i=0; i < result.getTokensList().size();i++){
 				// new
-				if(chunkTags.get(i).contains("B") && !prevB){
-					entities.add(sb.toString());
+				if(result.getChunkTagsList().get(i).equals("B-NP")){
 					sb.setLength(0);
-					prevB = true;
+					if(!result.getTokensList().get(i).equals("the"))
+					sb.append(result.getTokensList().get(i)+" ");
+					//entities.add(sb.toString());
+					nounphrase = true;
 				}
 				// new
-				else if(chunkTags.get(i).contains("B") && prevB){
-					entities.add(sb.toString());
-					sb.setLength(0);
+				else if(result.getChunkTagsList().get(i).equals("I-NP")){
+					if(!result.getTokensList().get(i).equals("the"))
+					sb.append(result.getTokensList().get(i)+" ");
 				}
-				else if(chunkTags.get(i).contains("I")){
-					prevB = false;
+				else{
+					if(nounphrase){
+						entities.add(sb.toString());
+						sb.setLength(0);
+					}
+					nounphrase = false;
 				}
 			}
-			return entities;
-		}*/
+			result.setNounPhrases(entities);
+		}
 
 		public static void printData(List<ProcessResult> data){
 			System.out.format("%7s %10s\t %7s\t %7s\n","Sentence","Token","POSTag","ChunkTag");
 			for(int i2 = 0; i2 < data.size();i2++){
-				//System.out.println(data.get(i2).getSentence());
+				System.out.println(data.get(i2).getSentence());
 				for(int i1 = 0; i1 < data.get(i2).getTokensList().size(); i1++){
 					if(data.get(i2).getChunkTagsList().get(i1).contains("NP")){
 						System.out.format("%7d: %10s\t %7s\t %7s<<<<\n",
@@ -223,6 +221,9 @@ public class ConceptExtractor {
 								data.get(i2).getPosTagsList().get(i1), 
 								data.get(i2).getChunkTagsList().get(i1));
 				}
+				System.out.println("==========");
+				System.out.println("Noun Phrases: "+data.get(i2).getNounPhrases().toString());
+				System.out.println("==========");
 				System.out.println("==========");
 			}
 		}
