@@ -7,6 +7,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.xml.stream.XMLInputFactory;
@@ -25,8 +26,8 @@ public class ConceptExtractor {
 
 		//with chunks
 		if(criteria != null){
-			List<ProcessResult> results = cp.processText(criteria);
-			CriteriaPreprocessor.printData(results);
+			ProcessResult result = cp.processText(criteria);
+			CriteriaPreprocessor.printData(result);
 		}
 	}
 	public static ClinicalTrial downloadCT(String nct_id){
@@ -120,22 +121,23 @@ public class ConceptExtractor {
 		private NLPTagger tg = new NLPTagger("en-pos-maxent.bin");
 		private NLPChunker ck = new NLPChunker("en-chunker.bin");
 
-		public ProcessResult processSentence(String sentence){
+/*		public ProcessResult processSentence(String sentence){
 			ProcessResult result = new ProcessResult();
 			result.setSentence(sentence);
 			//result.setSentence(sd.sentenceDetect(text));
 
-			List<String> sentenceTokens = tk.tokenize(sentence);
-			List<String> sentencePosTags = tg.posTag(sentenceTokens);
-			List<String> sentenceChunkTags = ck.chunk(sentenceTokens,sentencePosTags);
+			String[] sentenceTokens = tk.tokenize(sentence);
+			String[] sentencePosTags = tg.posTag(sentenceTokens);
+			String[] sentenceChunkTags = ck.chunk(sentenceTokens,sentencePosTags);
 
 			result.setTokensList(sentenceTokens);
 			result.setPosTagsList(sentencePosTags);
 			result.setChunkTagsList(sentenceChunkTags);
 			return result;
-		}
+		}*/
 
-		public List<ProcessResult> processText(String text){
+		public ProcessResult processText(String text){
+			ProcessResult result = new ProcessResult();
 			String refinedText;
 			// Elimina los guiones de puntos de contenido
 			refinedText = text.replaceAll("-\\s+(?=[A-Z])", "");
@@ -146,11 +148,27 @@ public class ConceptExtractor {
 			refinedText = refinedText.replaceAll("\\.{2}", ". ");
 			//refinedText = refinedText.replaceAll("(?<=\\p{Punct})\n\\s+(?=[A-Z])", "\n");
 			//refinedText = refinedText.replaceAll(" [a-z]. ","");
-			List<ProcessResult> resultList = new ArrayList<ProcessResult>();
+			
+			
+			int i = 0;
 			for(String sentence: sd.sentenceDetect(refinedText)){
-				resultList.add(processSentence(sentence));
+				String[] sentenceTokens = tk.tokenize(sentence);
+				String[] sentencePosTags = tg.posTag(sentenceTokens);
+				String[] sentenceChunkTags = ck.chunk(sentenceTokens,sentencePosTags);
+		
+				//String[] newArr = new String[sentenceTokens.length];
+				// List<String> strings = Arrays.asList(new String[]{"one", "two", "three"});			
+				result.getTokensList().add(new ArrayList<String>(Arrays.asList(sentenceTokens)));
+				result.getPosTagsList().add(new ArrayList<String>(Arrays.asList(sentencePosTags)));
+				result.getChunkTagsList().add(new ArrayList<String>(Arrays.asList(sentenceChunkTags)));
+				
+				
+				/*System.arraycopy(sentenceTokens, 0, result.getTokensList().get(i), 0, sentenceTokens.length);
+				System.arraycopy(sentencePosTags, 0, result.getPosTagsList().get(i), 0, sentencePosTags.length);
+				System.arraycopy(sentenceChunkTags, 0, result.getChunkTagsList().get(i), 0, sentenceChunkTags.length);*/
+				i++;
 			}
-			return resultList;
+			return result;
 		}
 
 		/*		public List<String> processSentences(String text){
@@ -204,24 +222,24 @@ public class ConceptExtractor {
 			return entities;
 		}*/
 
-		public static void printData(List<ProcessResult> data){
+		public static void printData(ProcessResult data){
 			System.out.format("%7s %10s\t %7s\t %7s\n","Sentence","Token","POSTag","ChunkTag");
-			for(int i2 = 0; i2 < data.size();i2++){
+			for(int i2 = 0; i2 < data.getSentence().size();i2++){
 				//System.out.println(data.get(i2).getSentence());
-				for(int i1 = 0; i1 < data.get(i2).getTokensList().size(); i1++){
-					if(data.get(i2).getChunkTagsList().get(i1).contains("NP")){
+				for(int i1 = 0; i1 < data.getTokensList().get(i2).size(); i1++){
+					if(data.getChunkTagsList().get(i2).get(i1).contains("NP")){
 						System.out.format("%7d: %10s\t %7s\t %7s<<<<\n",
 								i2,
-								data.get(i2).getTokensList().get(i1),
-								data.get(i2).getPosTagsList().get(i1), 
-								data.get(i2).getChunkTagsList().get(i1));
+								data.getTokensList().get(i2).get(i1),
+								data.getPosTagsList().get(i2).get(i1),
+								data.getChunkTagsList().get(i2).get(i1));
 					}
 					else
 						System.out.format("%7d: %10s\t %7s\t %7s\n",
 								i2,
-								data.get(i2).getTokensList().get(i1),
-								data.get(i2).getPosTagsList().get(i1), 
-								data.get(i2).getChunkTagsList().get(i1));
+								data.getTokensList().get(i2).get(i1),
+								data.getPosTagsList().get(i2).get(i1), 
+								data.getChunkTagsList().get(i2).get(i1));
 				}
 				System.out.println("==========");
 			}

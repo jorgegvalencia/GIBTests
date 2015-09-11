@@ -17,18 +17,14 @@ public class NLPTagger {
 		model_route = model;
 	}
 
-	public List<String> posTag(List<String> tokenList){
+	public String[] posTag(String[] tokenList){
 		InputStream modelIn = null;
-		List<String> tags = new ArrayList<String>();
-		String[] tokens = new String[tokenList.size()];
-		tokens = tokenList.toArray(tokens);
+		String[] tags = null;
 		try {
 			modelIn = new FileInputStream(model_route);
 			POSModel model = new POSModel(modelIn);
 			POSTaggerME tagger = new POSTaggerME(model);
-			for(String posTag : tagger.tag(tokens)){
-				tags.add(posTag);
-			}
+			tags = tagger.tag(tokenList);
 		}
 		catch (FileNotFoundException e1) {
 			e1.printStackTrace();

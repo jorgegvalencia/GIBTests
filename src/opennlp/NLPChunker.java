@@ -17,20 +17,15 @@ public class NLPChunker {
 		model_route = model;
 	}
 
-	public List<String> chunk(List<String> tokenList, List<String> tagList){
+	public String[] chunk(String[] tokenList, String[] tagList){
 		InputStream modelIn = null;
 		ChunkerModel model = null;
-		List<String> chunkTags = new ArrayList<String>();
-		String[] tokens = new String[tokenList.size()];
-		tokens = tokenList.toArray(tokens);
-		String[] posTags = new String[tagList.size()];
-		tokens = tagList.toArray(posTags);
+		String[] chunkTags = null;
 		try {
 			modelIn = new FileInputStream(model_route);
 			model = new ChunkerModel(modelIn);
 			ChunkerME chunker = new ChunkerME(model);
-			for(String chunk : chunker.chunk(tokens, posTags))
-				chunkTags.add(chunk);
+			chunkTags = chunker.chunk(tokenList, tagList);
 		}
 		catch (FileNotFoundException e1) {
 			e1.printStackTrace();

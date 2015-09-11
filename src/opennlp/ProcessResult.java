@@ -4,47 +4,50 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProcessResult {
-	private String sentence;
-	private List<String> tokensList;
-	private List<String> posTagsList;
-	private List<String> chunkTagsList;
+	private List<String> sentence;
+	private List<List<String>> tokensList;
+	private List<List<String>> posTagsList;
+	private List<List<String>> chunkTagsList;
 
 	public ProcessResult(){
-		sentence = new String();	
-		tokensList = new ArrayList<String>();
-		posTagsList = new ArrayList<String>();
-		chunkTagsList = new ArrayList<String>();	
+		sentence = new ArrayList<String>();
+		tokensList = new ArrayList<List<String>>();
+		posTagsList = new ArrayList<List<String>>();
+		chunkTagsList = new ArrayList<List<String>>();
 	}
 
-	public String getSentence() {
+	public List<String> getSentence() {
 		return sentence;
 	}
 
-	public List<String> getTokensList() {
+	public List<List<String>> getTokensList() {
 		return tokensList;
 	}
 
-	public List<String> getPosTagsList() {
+	public List<List<String>> getPosTagsList() {
 		return posTagsList;
 	}
 
-	public List<String> getChunkTagsList() {
+	public List<List<String>> getChunkTagsList() {
 		return chunkTagsList;
 	}
 
-	public void setSentence(String sentence) {
+	public void setSentence(List<String> sentence) {
 		this.sentence = sentence;
 	}
 
-	public void setTokensList(List<String> tokensList) {
+	public void setTokensList(List<List<String>> tokensList) {
 		this.tokensList = tokensList;
 	}
 
-	public void setPosTagsList(List<String> posTagsList) {
+	public void setPosTagsList(List<List<String>> posTagsList) {
 		this.posTagsList = posTagsList;
 	}
 
-	public void setChunkTagsList(List<String> chunkTagsList) {
+	public void setChunkTagsList(List<List<String>> chunkTagsList) {
 		this.chunkTagsList = chunkTagsList;
 	}
+
+
+	
 }

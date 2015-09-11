@@ -17,16 +17,14 @@ public class NLPTokenizer {
 	public NLPTokenizer(String model){
 		model_route = model;
 	}
-	public List<String> tokenize(String sentence){
+	public String[] tokenize(String sentence){
 		InputStream modelIn = null;
-		List<String> tokens = new ArrayList<String>();
+		String[] tokens = null;
 		try {
 			modelIn = new FileInputStream(model_route);
 			TokenizerModel model = new TokenizerModel(modelIn);
 			Tokenizer tokenizer = new TokenizerME(model);
-			for(String token: tokenizer.tokenize(sentence)){
-				tokens.add(token);
-			}
+			tokens = tokenizer.tokenize(sentence);
 		}
 		catch (FileNotFoundException e1) {
 			e1.printStackTrace();
