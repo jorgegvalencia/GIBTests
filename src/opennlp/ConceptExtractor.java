@@ -1,5 +1,7 @@
 package opennlp;
 
+import gov.nih.nlm.nls.metamap.Result;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -14,6 +16,8 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import metamap.MetaMapClient;
+
 public class ConceptExtractor {
 
 	public static void main(String[] args) {
@@ -22,12 +26,27 @@ public class ConceptExtractor {
 		// NCT00148876
 		ClinicalTrial ct = downloadCT("NCT01358877");
 		String criteria = ct.getExc_criteria();
-
-		//with chunks
+		ct.printCT();
+		
+		//MetaMapApi instantiation
+		MetaMapClient mmclient = new MetaMapClient("-y");
+		
+		// Vocabularies
+		// AOD, CHV, COSTAR, CSP, CSS, FMA, HGNC, HGNC, HL7V2.5, HL7V3.0, ICD10CM, ICD9CM, ICPC, LNC, MSH, MTH, NCI, NLMSubSyn, OMIM, PDQ, QMR, SNMI, SNOMEDCT_US
+		
+		//Performing the query
+		List<Result> resultList = mmclient.queryFromString(cp.preProcessText(criteria));
+		//Printing the result
+		Result result = resultList.get(0);
+		mmclient.printAcronymsAbbrevs(result);
+		mmclient.printNegations(result);
+		mmclient.printUtterances(result);
+		
+		/*openNLP
 		if(criteria != null){
 			List<ProcessResult> results = cp.processText(criteria);
 			CriteriaPreprocessor.printData(results);
-		}
+		}*/
 	}
 	public static ClinicalTrial downloadCT(String nct_id){
 		ClinicalTrial ct = new ClinicalTrial();
@@ -137,6 +156,14 @@ public class ConceptExtractor {
 		}
 
 		public List<ProcessResult> processText(String text){
+			List<ProcessResult> resultList = new ArrayList<ProcessResult>();
+			for(String sentence: sd.sentenceDetect(text)){
+				resultList.add(processSentence(sentence));
+			}
+			return resultList;
+		}
+		
+		public String preProcessText(String text){
 			String refinedText;
 			// Elimina los guiones de puntos de contenido
 			refinedText = text.replaceAll("-\\s+(?=[A-Z])", "");
@@ -147,11 +174,7 @@ public class ConceptExtractor {
 			refinedText = refinedText.replaceAll("\\.{2}", ". ");
 			//refinedText = refinedText.replaceAll("(?<=\\p{Punct})\n\\s+(?=[A-Z])", "\n");
 			//refinedText = refinedText.replaceAll(" [a-z]. ","");
-			List<ProcessResult> resultList = new ArrayList<ProcessResult>();
-			for(String sentence: sd.sentenceDetect(refinedText)){
-				resultList.add(processSentence(sentence));
-			}
-			return resultList;
+			return refinedText;
 		}
 
 
