@@ -26,10 +26,17 @@ public class ConceptExtractor {
 		// NCT00148876
 		ClinicalTrial ct = downloadCT("NCT01358877");
 		String criteria = ct.getExc_criteria();
-		ct.printCT();
+		//ct.printCT();
 		
 		//MetaMapApi instantiation
-		MetaMapClient mmclient = new MetaMapClient("-y");
+		/*
+		 *  -K --ignore_stop_phrases              : ignore stop phrases.
+		 *  -i --ignore_word_order                : ignore word order
+		 *  -D --all_derivational_variants        : all derivational variants
+		 *  -z --term_processing                  : use term processing
+		 *  -R --restrict_to_sources <sourcelist> : restrict to sources
+		 */
+		MetaMapClient mmclient = new MetaMapClient("-y -R SNOMEDCT_US");
 		
 		// Vocabularies
 		// AOD, CHV, COSTAR, CSP, CSS, FMA, HGNC, HGNC, HL7V2.5, HL7V3.0, ICD10CM, ICD9CM, ICPC, LNC, MSH, MTH, NCI, NLMSubSyn, OMIM, PDQ, QMR, SNMI, SNOMEDCT_US
@@ -37,10 +44,15 @@ public class ConceptExtractor {
 		//Performing the query
 		List<Result> resultList = mmclient.queryFromString(cp.preProcessText(criteria));
 		//Printing the result
-		Result result = resultList.get(0);
-		mmclient.printAcronymsAbbrevs(result);
-		mmclient.printNegations(result);
-		mmclient.printUtterances(result);
+		System.out.println("Tamaño resultList: "+ resultList.size());
+		//Result result = resultList.get(0);
+		//
+		for(Result item: resultList){
+			mmclient.getConceptsList(item);
+			/*mmclient.printAcronymsAbbrevs(item);
+			mmclient.printNegations(item);
+			mmclient.printUtterances(item);*/
+		}
 		
 		/*openNLP
 		if(criteria != null){
@@ -48,7 +60,7 @@ public class ConceptExtractor {
 			CriteriaPreprocessor.printData(results);
 		}*/
 	}
-	public static ClinicalTrial downloadCT(String nct_id){
+	private static ClinicalTrial downloadCT(String nct_id){
 		ClinicalTrial ct = new ClinicalTrial();
 		String path = "https://clinicaltrials.gov/show/"+nct_id+"?displayxml=true";
 		try {
@@ -133,7 +145,7 @@ public class ConceptExtractor {
 		return ct;
 	}
 
-	public static class CriteriaPreprocessor{
+	private static class CriteriaPreprocessor{
 		private NLPSentenceD sd = new NLPSentenceD("en-sent.bin");
 		private NLPTokenizer tk = new NLPTokenizer("en-token.bin");
 		private NLPTagger tg = new NLPTagger("en-pos-maxent.bin");
