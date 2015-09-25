@@ -28,30 +28,16 @@ public class ConceptExtractor {
 		String criteria = ct.getExc_criteria();
 		//ct.printCT();
 		
-		//MetaMapApi instantiation
-		/*
-		 *  -K --ignore_stop_phrases              : ignore stop phrases.
-		 *  -i --ignore_word_order                : ignore word order
-		 *  -D --all_derivational_variants        : all derivational variants
-		 *  -z --term_processing                  : use term processing
-		 *  -R --restrict_to_sources <sourcelist> : restrict to sources
-		 */
-		MetaMapClient mmclient = new MetaMapClient("-y -R SNOMEDCT_US");
+		MetaMapClient mmclient = new MetaMapClient("-gi -Q 1 -R SNOMEDCT_US");
 		
-		// Vocabularies
-		// AOD, CHV, COSTAR, CSP, CSS, FMA, HGNC, HGNC, HL7V2.5, HL7V3.0, ICD10CM, ICD9CM, ICPC, LNC, MSH, MTH, NCI, NLMSubSyn, OMIM, PDQ, QMR, SNMI, SNOMEDCT_US
+		List<String> sentences = cp.processText(criteria);
+		for(String sentence: sentences){
+			//Performing the query
+			List<Result> resultList = mmclient.queryFromString(cp.preProcessText(sentence));
+			for(Result item: resultList){
+				mmclient.printUtterances(item);
+			}
 		
-		//Performing the query
-		List<Result> resultList = mmclient.queryFromString(cp.preProcessText(criteria));
-		//Printing the result
-		System.out.println("Tamaño resultList: "+ resultList.size());
-		//Result result = resultList.get(0);
-		//
-		for(Result item: resultList){
-			mmclient.getConceptsList(item);
-			/*mmclient.printAcronymsAbbrevs(item);
-			mmclient.printNegations(item);
-			mmclient.printUtterances(item);*/
 		}
 		
 		/*openNLP
@@ -167,10 +153,10 @@ public class ConceptExtractor {
 			return result;
 		}
 
-		public List<ProcessResult> processText(String text){
-			List<ProcessResult> resultList = new ArrayList<ProcessResult>();
+		public List<String> processText(String text){
+			List<String> resultList = new ArrayList<String>();
 			for(String sentence: sd.sentenceDetect(text)){
-				resultList.add(processSentence(sentence));
+				resultList.add(sentence);
 			}
 			return resultList;
 		}
@@ -184,6 +170,8 @@ public class ConceptExtractor {
 			// A las oraciones sin punto final y con salto de línea se le añade un punto final
 			refinedText = refinedText.replaceAll("(?<=.)\n\\s+(?=[A-Z]{1}[a-z])", ". ");
 			refinedText = refinedText.replaceAll("\\.{2}", ". ");
+			refinedText = refinedText.replaceAll("-", " ");
+			refinedText = refinedText.replaceAll("\\s+", " ");
 			//refinedText = refinedText.replaceAll("(?<=\\p{Punct})\n\\s+(?=[A-Z])", "\n");
 			//refinedText = refinedText.replaceAll(" [a-z]. ","");
 			return refinedText;
