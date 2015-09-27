@@ -155,7 +155,7 @@ public class ConceptExtractor {
 		return utterances;
 	}
 
-	public List<EligibilityCriteria> createECFromText(String options,String text){
+	public List<EligibilityCriteria> getECFromText(String options,String text){
 		mmapi.setOptions(options);
 		List<EligibilityCriteria> list = new ArrayList<EligibilityCriteria>();
 		try{
@@ -184,6 +184,29 @@ public class ConceptExtractor {
 		}
 		return list;
 
+	}
+	
+	public List<Concept> getConceptsFromText(String options,String text){
+		List<Concept> list = new ArrayList<Concept>();
+		try{
+			List<Result> resultList = mmapi.processCitationsFromString(text);
+			for(Result result: resultList){
+				for (Utterance utterance: result.getUtteranceList()) {
+					for (PCM pcm: utterance.getPCMList()){
+						for (Mapping map: pcm.getMappingList()) {
+							for(Ev mapEv: map.getEvList()){
+								Concept concept = new Concept(mapEv.getConceptName(),mapEv.getPreferredName(),mapEv.getConceptId(),mapEv.getScore(),mapEv.getSemanticTypes(),mapEv.getMatchedWords());
+								list.add(concept);
+							}
+						}
+					}
+				}
+			}
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+		return list;
 	}
 
 	public void setOptions(String options) {

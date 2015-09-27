@@ -60,7 +60,8 @@ public final class App {
 			// check matching type: simple, complex, partial
 		}
 	}
-
+	
+	/* Tomar las afirmaciones del texto*/
 	public static void Test2(){
 		ClinicalTrial ct = downloadCT("NCT01358877");
 		ConceptExtractor ce = new ConceptExtractor();
@@ -71,7 +72,8 @@ public final class App {
 			System.out.println(ut);
 		}
 	}
-
+	
+	/* Tomar los conceptos del texto*/
 	public static void Test3(){
 		ClinicalTrial ct = downloadCT("NCT01358877");
 		ConceptExtractor ce = new ConceptExtractor();
@@ -79,7 +81,7 @@ public final class App {
 		String criteria = ct.getCriteria();
 		
 		List<Concept> conceptList1 = new ArrayList<Concept>();
-		List<EligibilityCriteria> list = ce.createECFromText("-R SNOMEDCT_US",pp.preProcessText(criteria));
+		List<EligibilityCriteria> list = ce.getECFromText("-R SNOMEDCT_US",pp.preProcessText(criteria));
 		for(EligibilityCriteria ec: list){
 			ec.printEC();
 			for(Concept concept: ec.getConcepts()){
@@ -87,9 +89,9 @@ public final class App {
 				conceptList1.add(concept);
 			}
 		}
-		createConceptsCSV("csvtest"+System.currentTimeMillis()+".csv",conceptList1);
 	}
 	
+	/* Tomar los conceptos del texto sin stop words */
 	public static void Test4(){
 		ClinicalTrial ct = downloadCT("NCT01358877");
 		ConceptExtractor ce = new ConceptExtractor();
@@ -97,7 +99,7 @@ public final class App {
 		String criteria = ct.getCriteria();
 		
 		List<Concept> conceptList1 = new ArrayList<Concept>();
-		List<EligibilityCriteria> list = ce.createECFromText("-R SNOMEDCT_US",pp.removeSW(criteria));
+		List<EligibilityCriteria> list = ce.getECFromText("-R SNOMEDCT_US",pp.removeSW(criteria));
 		for(EligibilityCriteria ec: list){
 			ec.printEC();
 			for(Concept concept: ec.getConcepts()){
@@ -108,6 +110,7 @@ public final class App {
 		createConceptsCSV("csvtest"+System.currentTimeMillis()+".csv",conceptList1);
 	}
 	
+	/* Tomar los conceptos del texto sin las exclude words */
 	public static void Test5(){
 		ClinicalTrial ct = downloadCT("NCT01358877");
 		ConceptExtractor ce = new ConceptExtractor();
@@ -115,7 +118,7 @@ public final class App {
 		String criteria = ct.getCriteria();
 		
 		List<Concept> conceptList1 = new ArrayList<Concept>();
-		List<EligibilityCriteria> list = ce.createECFromText("-R SNOMEDCT_US",pp.removeEW(criteria));
+		List<EligibilityCriteria> list = ce.getECFromText("-R SNOMEDCT_US",pp.removeEW(criteria));
 		for(EligibilityCriteria ec: list){
 			ec.printEC();
 			for(Concept concept: ec.getConcepts()){
@@ -134,19 +137,19 @@ public final class App {
 		
 		List<Concept> conceptList = new ArrayList<Concept>();
 		
-		List<EligibilityCriteria> list1 = ce.createECFromText("-y -R SNOMEDCT_US",pp.preProcessText(criteria));
+		List<EligibilityCriteria> list1 = ce.getECFromText("-y -R SNOMEDCT_US",pp.preProcessText(criteria));
 		for(EligibilityCriteria ec: list1){
 			for(Concept concept: ec.getConcepts()){
 				conceptList.add(concept);
 			}
 		}
-		List<EligibilityCriteria> list2 = ce.createECFromText("-y -R SNOMEDCT_US",pp.removeSW(criteria));
+		List<EligibilityCriteria> list2 = ce.getECFromText("-y -R SNOMEDCT_US",pp.removeSW(criteria));
 		for(EligibilityCriteria ec: list2){
 			for(Concept concept: ec.getConcepts()){
 				conceptList.add(concept);
 			}
 		}
-		List<EligibilityCriteria> list3 = ce.createECFromText("-y -R SNOMEDCT_US",pp.removeEW(criteria));
+		List<EligibilityCriteria> list3 = ce.getECFromText("-y -R SNOMEDCT_US",pp.removeEW(criteria));
 		for(EligibilityCriteria ec: list3){
 			for(Concept concept: ec.getConcepts()){
 				conceptList.add(concept);
@@ -156,24 +159,29 @@ public final class App {
 		createConceptsCSV("csvtest"+System.currentTimeMillis()+".csv",conceptList);
 	}
 	
+	/**/
 	public static void Test7(){
 		ClinicalTrial ct = downloadCT("NCT01358877");
 		ConceptExtractor ce = new ConceptExtractor();
 		Preprocessor pp = new Preprocessor();
 		String criteria = ct.getCriteria();
-		String text = pp.removeSW(criteria);
-		text = pp.removeEW(text);
+		String text = pp.processAll(criteria);
 		
+		/*
 		List<Concept> conceptList = new ArrayList<Concept>();
-		
-		List<EligibilityCriteria> list = ce.createECFromText("-y -R SNOMEDCT_US",text);
+		List<EligibilityCriteria> list = ce.getECFromText("-R SNOMEDCT_US",text);
 		for(EligibilityCriteria ec: list){
 			for(Concept concept: ec.getConcepts()){
 				conceptList.add(concept);
 			}
 		}
+		*/
 		
-		createConceptsCSV("csvtest"+System.currentTimeMillis()+".csv",conceptList);
+		List<Concept> list = ce.getConceptsFromText("-giz -Q 1 -R SNOMEDCT_US", text);
+		for(Concept c: list){
+			c.printConcept();
+		}
+		createConceptsCSV("csvtest"+System.currentTimeMillis()+".csv",list);
 	}
 
 

@@ -32,7 +32,7 @@ public final class Preprocessor {
 	}
     
     public String removeSW(String text){
-    	String refinedText = preProcessText(text);
+    	String refinedText = text;
     	for(String sw: stopWords){
     		refinedText = refinedText.replaceAll("\\s"+sw+"\\s", " ");
     	}
@@ -40,10 +40,17 @@ public final class Preprocessor {
     }
     
     public String removeEW(String text){
-    	String refinedText = preProcessText(text);
+    	String refinedText = text;
     	for(String ew: exclusionWords){
     		refinedText = refinedText.replaceAll("\\s"+ew+"\\s", " ");
     	}
+    	return refinedText;
+    }
+    
+    public String processAll(String text){
+    	String refinedText = preProcessText(text);
+    	refinedText = removeSW(refinedText);
+    	refinedText = removeEW(refinedText);
     	return refinedText;
     }
 }
